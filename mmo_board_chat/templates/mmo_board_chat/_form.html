@@ -1,0 +1,30 @@
+<div class="form-container">
+    <form method="post" class="bg-white p-4 rounded shadow-sm">
+        {% csrf_token %}
+
+        <h2 class="h4 mb-4 text-center">{{ form_title }}</h2>
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                Исправьте ошибки в форме
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary w-100 py-2">
+            {{ submit_text }}
+        </button>
+    </form>
+</div>

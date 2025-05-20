@@ -1,0 +1,78 @@
+/* Основные стили */
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Стили для категорий */
+.badge-tank { background-color: #6c757d; }
+.badge-heal { background-color: #198754; }
+.badge-dd { background-color: #dc3545; }
+.badge-merc { background-color: #fd7e14; }
+
+/* Формы */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+.reply-accepted {
+    border-left: 4px solid #198754;
+    background-color: rgba(25, 135, 84, 0.05);
+}
+
+.reply-actions {
+    margin-top: 10px;
+}
+
+/* Стили для статуса отклика */
+.badge-reply {
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+/* Стили для личного кабинета */
+.reply-item {
+    transition: all 0.3s ease;
+}
+
+.reply-item:hover {
+    background-color: #f8f9fa;
+}
+
+.reply-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.reply-item:hover .reply-actions {
+    opacity: 1;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .filter-buttons .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .reply-actions {
+        opacity: 1; /* Всегда показываем на мобильных */
+    }
+}

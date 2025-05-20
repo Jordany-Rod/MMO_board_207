@@ -1,0 +1,82 @@
+{% extends 'mmo_board_chat/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Карточка объявления -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">{{ post.title }}</h2>
+                <span class="badge bg-secondary">{{ post.category.name }}</span>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            {% if post.image %}
+            <img src="{{ post.image.url }}" class="img-fluid rounded mb-3" alt="Изображение объявления">
+            {% endif %}
+            
+            <div class="post-content mb-4">
+                {{ post.content|linebreaks }}
+            </div>
+            
+            <div class="d-flex justify-content-between text-muted">
+                <small>Автор: {{ post.author.username }}</small>
+                <small>{{ post.created_at|date:"d.m.Y H:i" }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма отклика -->
+    {% if user.is_authenticated %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Оставить отклик</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.text }}
+                <button type="submit" class="btn btn-primary mt-2">Отправить</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <a href="{% url 'mmo_board_chat:login' %}?next={{ request.path }}">Войдите</a>, чтобы оставить отклик
+    </div>
+    {% endif %}
+
+    <!-- Список откликов -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Отклики ({{ replies.count }})</h5>
+        </div>
+        
+        <div class="list-group list-group-flush">
+            {% for reply in replies %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between mb-2">
+                    <strong>{{ reply.author.username }}</strong>
+                    <small class="text-muted">{{ reply.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <p class="mb-1">{{ reply.text }}</p>
+                
+                {% if user == post.author and not reply.is_accepted %}
+                <div class="mt-2">
+                    <a href="{% url 'mmo_board_chat:reply_accept' reply.id %}"
+                       class="btn btn-sm btn-success">Принять</a>
+                    <a href="{% url 'mmo_board_chat:reply_delete' reply.id %}"
+                       class="btn btn-sm btn-danger">Отклонить</a>
+                </div>
+                {% elif reply.is_accepted %}
+                <span class="badge bg-success ms-2">Принят</span>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="list-group-item text-muted">Пока нет откликов</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
