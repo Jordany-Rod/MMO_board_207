@@ -11,13 +11,14 @@ urlpatterns = [
     path('', views.home, name='home'),
 
     # Авторизация
-    path('register/', views.register_view, name='register'),
-    path('confirm/<str:code>/', views.confirm_email, name='confirm_email'),
-    path('confirm/', views.confirm_email_manual, name='confirm_email_manual'),
-    path('resend-code/', views.resend_code, name='resend_code'),
+    path('register/', views.register_view, name='register'), # Регистрация
+    path('confirm/<str:code>/', views.confirm_email, name='confirm_email'), # Автоподтверждение по ссылке
+    path('confirm/', views.confirm_email_manual, name='confirm_email_manual'), # Ручной ввод кода
+    path('resend-code/', views.resend_code, name='resend_code'), # Повторная отправка кода
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
 
+    # Управление откликами
     path('replies/<int:reply_id>/accept/', views.reply_accept, name='reply_accept'),
     path('replies/<int:reply_id>/delete/', views.reply_delete, name='reply_delete'),
 
@@ -29,9 +30,9 @@ urlpatterns = [
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
     path('posts/<int:post_id>/reply/', views.create_reply, name='reply_create'),
 
-    # API-эндпоинты (если будут нужны)
+    # API-эндпоинты
     path('api/posts/', views.api_posts, name='api_posts'),
 
-    path('upload/', csrf_exempt(ckeditor_views.upload)),
-    path('browse/', csrf_exempt(ckeditor_views.browse)),
+    path('upload/', csrf_exempt(ckeditor_views.upload)), # Загрузка файлов для CKEditor
+    path('browse/', csrf_exempt(ckeditor_views.browse)), # Просмотр загруженных файлов
 ]

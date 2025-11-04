@@ -16,14 +16,14 @@ def notify_about_new_reply(sender, instance, created, **kwargs):
 
 {instance.text}
 
-Просмотреть все отклики: {settings.SITE_URL}/profile/'''
+Просмотреть все отклики: {settings.SITE_URL}/profile/''' # Ссылка на приватную страницу
 
         send_mail(
             subject=subject,
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[instance.post.author.email],
-            fail_silently=False,
+            recipient_list=[instance.post.author.email], # Отправка автору объявления
+            fail_silently=False, # Выбрасывать исключение при ошибке отправки
         )
 
 

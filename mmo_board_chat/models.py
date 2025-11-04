@@ -5,11 +5,13 @@ from ckeditor.fields import RichTextField
 from mmo_board_chat.resources import CATEGORIES
 import secrets
 
+
 class User(AbstractUser):
+    """
+    КАСТОМНАЯ МОДЕЛЬ ПОЛЬЗОВАТЕЛЯ
+    """
     email = models.EmailField(unique=True)
     email_confirmed = models.BooleanField(default=False)
-    #registration_code = models.CharField(max_length=20)
-    #is_active = models.BooleanField(default=False) # Подтверждение email
     confirmation_code = models.CharField(max_length=40, blank=True)
     username = models.CharField(max_length=30)
 
@@ -17,6 +19,10 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def generate_confirmation_code(self):
+        """
+        Генерация уникального кода подтверждения для email
+        Используется при регистрации
+        """
         code = secrets.token_urlsafe(20)
         self.confirmation_code = code
         self.save()
@@ -26,27 +32,33 @@ class User(AbstractUser):
         return self.email
 
 class Category(models.Model):
+    """
+    МОДЕЛЬ КАТЕГОРИЙ
+    """
     name = models.CharField(max_length=6, choices=CATEGORIES, unique=True, )
 
     def __str__(self):
         return dict(CATEGORIES).get(self.name, self.name)
 
 class Post(models.Model):
+    """
+    МОДЕЛЬ ОБЪЯВЛЕНИЙ
+    """
     title = models.CharField('Заголовок', max_length=200)
     content = RichTextField('Содержание')
     author = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE, # При удалении пользователя удаляются его объявления
         verbose_name='Автор'
     )
     category = models.ForeignKey(
         'Category',
-        on_delete=models.PROTECT,
+        on_delete=models.PROTECT, # Защита от удаления категории с существующими объявлениями
         verbose_name='Категория'
     )
     image = models.ImageField(
         'Изображение',
-        upload_to='posts/',
+        upload_to='posts/', # Папка для загрузки изображений
         blank=True,
         null=True
     )
@@ -58,6 +70,9 @@ class Post(models.Model):
 
 
 class Reply(models.Model):
+    """
+    МОДЕЛЬ ОТКЛИКОВ
+    """
     post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name="Объявление")
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
     text = models.TextField("Текст отклика")
@@ -65,6 +80,9 @@ class Reply(models.Model):
     is_accepted = models.BooleanField("Принят", default=False)
 
     def status_badge(self):
+        """
+        Вспомогательный метод для отображения статуса в HTML
+        """
         if self.is_accepted:
             return '<span class="badge bg-success">Принят</span>'
         return ''

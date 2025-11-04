@@ -13,12 +13,14 @@ from .models import Post, Reply, Category, User
 
 
 
-# Вспомогательные функции
+"""ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ"""
 
 def generate_confirmation_code():
+    """Генерация кода подтверждения"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
 
 def send_confirmation_email(user, code):
+    """Отправка email с кодом подтверждения регистрации"""
     subject = 'Подтверждение регистрации'
     message = f'''Здравствуйте, {user.username}!
 
@@ -37,15 +39,15 @@ def send_confirmation_email(user, code):
         fail_silently=False,
     )
 
-"""Главная страница со списком объявлений"""
+"""ГЛАВНАЯ СТРАНИЦА"""
 def home(request):
+    """Главная страница со списком всех объявлений"""
     posts = Post.objects.all().order_by('-created_at')  # Сортировка по дате
     return render(request, 'mmo_board_chat/home.html', {'posts': posts})
 
-# Аутентификация
-
-"""Обработка входа пользователя"""
+"""АУТЕНТИФИКАЦИЯ"""
 def login_view(request):
+    """Обработка входа пользователя"""
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
@@ -66,8 +68,8 @@ def login_view(request):
     next_url = request.GET.get('next', '')
     return render(request, 'mmo_board_chat/login.html', {'next': next_url})
 
-"""Обработка регистрации нового пользователя"""
 def register_view(request):
+    """Регистрация нового пользователя"""
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -81,8 +83,8 @@ def register_view(request):
     return render(request, 'mmo_board_chat/register.html', {'form': form})
 
 
-"""Автоподтверждение email по ссылке"""
 def confirm_email(request, code):
+    """Автоподтверждение email по ссылке"""
     try:
         user = User.objects.get(confirmation_code=code)
         user.email_confirmed = True
@@ -95,8 +97,9 @@ def confirm_email(request, code):
         messages.error(request, 'Неверный код')
         return redirect('mmo_board_chat:home')
 
-"""Ручной ввод кода подтверждения"""
+
 def confirm_email_manual(request):
+    """Ручной ввод кода подтверждения (альтернатива ссылке)"""
     if request.method == 'POST':
         code = request.POST.get('code', '').strip()
         if not code:
@@ -125,8 +128,8 @@ def confirm_email_manual(request):
     # GET-запрос - просто отображаем форму
     return render(request, 'mmo_board_chat/confirm_email.html')
 
-"""Повторная отправка кода подтверждения"""
 def resend_code(request):
+    """Повторная отправка кода подтверждения"""
     if request.user.is_authenticated and not request.user.email_confirmed:
         code = request.user.generate_confirmation_code()
 
@@ -139,16 +142,16 @@ def resend_code(request):
 
     return redirect('mmo_board_chat:confirm_email_manual')
 
-"""Выход из системы"""
 def logout_view(request):
+    """Выход из системы"""
     logout(request)
     return redirect('mmo_board_chat:home')
 
-# Работа с объявлениями
+"""РАБОТА С ОБЪЯВЛЕНИЯМИ"""
 
-"""Создание нового объявления"""
 @login_required
 def create_post(request):
+    """Создание нового объявления"""
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -164,8 +167,8 @@ def create_post(request):
         'title': 'Создание объявления'
     })
 
-"""Просмотр деталей объявления с откликами"""
 def post_detail(request, post_id):
+    """Просмотр деталей объявления с откликами"""
     post = get_object_or_404(Post, id=post_id)
     replies = Reply.objects.filter(post=post).order_by('-created_at')
 
@@ -197,10 +200,11 @@ def post_detail(request, post_id):
         'form': form,
     })
 
-# Работа с откликами
+"""РАБОТА С ОТКЛИКАМИ"""
 
 @login_required
 def profile(request):
+    """"Приватная страница с откликами на объявления пользователя"""
     # Получаем все отклики на объявления пользователя
     replies = Reply.objects.filter(post__author=request.user).order_by('-created_at')
 
@@ -227,9 +231,9 @@ def profile(request):
     }
     return render(request, 'mmo_board_chat/profile.html', context)
 
-"""Принятие отклика на объявление"""
 @login_required
 def reply_accept(request, reply_id):
+    """Принятие отклика на объявление"""
     reply = get_object_or_404(Reply, id=reply_id)
 
     # Проверяем, что текущий пользователь - автор объявления
@@ -242,9 +246,9 @@ def reply_accept(request, reply_id):
     messages.success(request, f'Отклик от {reply.author.username} принят!')
     return redirect('mmo_board_chat:profile')
 
-"""Удаление отклика"""
 @login_required
 def reply_delete(request, reply_id):
+    """Удаление отклика"""
     reply = get_object_or_404(Reply, id=reply_id)
 
     # Проверяем, что пользователь - автор объявления или автор отклика
@@ -255,10 +259,9 @@ def reply_delete(request, reply_id):
     messages.success(request, 'Отклик удалён.')
     return redirect('mmo_board_chat:profile')
 
-
-"""Удаление отклика"""
 @login_required
 def delete_reply(request, reply_id):
+    """Удаление отклика"""
     reply = get_object_or_404(Reply, id=reply_id)
     post_id = reply.post.id
 
@@ -269,12 +272,12 @@ def delete_reply(request, reply_id):
     messages.success(request, 'Отклик удалён.')
     return redirect('mmo_board_chat:post_detail', post_id=post_id)
 
-"""Создание отклика"""
 @login_required
 def create_reply(request, post_id):
+    """Создание отклика"""
     return redirect('post_detail', post_id=post_id)
 
-# API-эндпоинт (пример)
+"""API"""
 def api_posts(request):
     return JsonResponse({'posts': []})  # Заглушка для API
 
